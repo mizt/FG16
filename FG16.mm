@@ -230,13 +230,6 @@ int main(int argc, char *argv[]) {
                     glb = nil;
                     json = nil;
                     dict = nil;
-
-                    //v.clear();
-                    //v.shrink_to_fit();
-                    //vt.clear();
-                    //vt.shrink_to_fit();
-                    //f.clear();
-                    //f.shrink_to_fit();
                 }
             }
         }
