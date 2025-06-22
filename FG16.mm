@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
                     [texture appendBytes:new const char[1]{0x20} length:1];
                 }
                 
-                std::string JSON = R"({"asset":{"generator":"RC","version":"2.0"},"scene":0,"scenes":[{"nodes":[0]}],"nodes":[{"mesh":0}],"materials":[{"doubleSided":true,"pbrMetallicRoughness":{"baseColorTexture":{"index":0},"metallicFactor":0,"roughnessFactor":1.0}}],"meshes":[{"primitives":[{"attributes":{"POSITION":0,"TEXCOORD_0":1},"indices":2,"material":0}]}],"textures":[{"sampler":0,"source":0}],"images":[{"bufferView":2,"mimeType":"image/jpeg","name":"texture"}],"accessors":[{"bufferView":0,"componentType":5126,"count":0,"max":[0,0,0],"min":[0,0,0],"type":"VEC3"},{"bufferView":1,"componentType":5126,"count":0,"type":"VEC2"},],"bufferViews":[{"buffer":0,"byteLength":0,"byteOffset":0},{"buffer":0,"byteLength":0,"byteOffset":0},{"buffer":0,"byteLength":0,"byteOffset":0}],"samplers":[{"magFilter":9729,"minFilter":9987,"wrapS":33071,"wrapT":33071}],"buffers":[{"byteLength":0}]})";
+                std::string JSON = R"({"asset":{"generator":"RC","version":"2.0"},"scene":0,"scenes":[{"nodes":[0]}],"nodes":[{"mesh":0}],"materials":[{"doubleSided":true,"pbrMetallicRoughness":{"baseColorTexture":{"index":0},"metallicFactor":0,"roughnessFactor":1.0}}],"meshes":[{"primitives":[{"attributes":{"POSITION":0,"TEXCOORD_0":1},"indices":2,"material":0}]}],"textures":[{"sampler":0,"source":0}],"images":[{"bufferView":2,"mimeType":"image/jpeg","name":"texture"}],"accessors":[{"bufferView":0,"componentType":5126,"count":0,"type":"VEC3"},{"bufferView":1,"componentType":5126,"count":0,"type":"VEC2"},],"bufferViews":[{"buffer":0,"byteLength":0,"byteOffset":0},{"buffer":0,"byteLength":0,"byteOffset":0},{"buffer":0,"byteLength":0,"byteOffset":0}],"samplers":[{"magFilter":9729,"minFilter":9987,"wrapS":33071,"wrapT":33071}],"buffers":[{"byteLength":0}]})";
                 
                 NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[[NSString stringWithUTF8String:JSON.c_str()] dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil];
                 
@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
 
                     NSCharacterSet *WHITESPACE = [NSCharacterSet whitespaceCharacterSet];
                     
-                
                     NSString *data = [NSString stringWithContentsOfFile:@"./FG.obj" encoding:NSUTF8StringEncoding error:nil];
                     NSArray *lines = [data componentsSeparatedByCharactersInSet: [NSCharacterSet newlineCharacterSet]];
                     
@@ -96,9 +95,6 @@ int main(int argc, char *argv[]) {
                         }
                     }
                     
-                    float v_min[3] = {0.0,0.0,0.0};
-                    float v_max[3] = {0.0,0.0,0.0};
-                    
                     for(int n=0; n<_f1.size(); n++) {
                         
                         _Float16 v[9] = {
@@ -107,40 +103,6 @@ int main(int argc, char *argv[]) {
                             (_Float16)_v[_f1[n].z].x,(_Float16)_v[_f1[n].z].y,(_Float16)_v[_f1[n].z].z,
                         };
                         
-                        if(n==0) {
-                            v_min[0] = v[0];
-                            v_min[1] = v[1];
-                            v_min[2] = v[2];
-                            
-                            v_max[0] = v[0];
-                            v_max[1] = v[1];
-                            v_max[2] = v[2];
-                        }
-                        
-                        if(v[0]<v_min[0]) v_min[0] = v[0];
-                        if(v[3]<v_min[0]) v_min[0] = v[3];
-                        if(v[6]<v_min[0]) v_min[0] = v[6];
-                        
-                        if(v[1]<v_min[1]) v_min[1] = v[1];
-                        if(v[4]<v_min[1]) v_min[1] = v[4];
-                        if(v[7]<v_min[1]) v_min[1] = v[7];
-                        
-                        if(v[2]<v_min[2]) v_min[2] = v[2];
-                        if(v[5]<v_min[2]) v_min[2] = v[5];
-                        if(v[8]<v_min[2]) v_min[2] = v[8];
-                        
-                        if(v_max[0]<v[0]) v_max[0] = v[0];
-                        if(v_max[0]<v[3]) v_max[0] = v[3];
-                        if(v_max[0]<v[6]) v_max[0] = v[6];
-                        
-                        if(v_max[1]<v[1]) v_max[1] = v[1];
-                        if(v_max[1]<v[4]) v_max[1] = v[4];
-                        if(v_max[1]<v[7]) v_max[1] = v[7];
-                        
-                        if(v_max[2]<v[2]) v_max[2] = v[2];
-                        if(v_max[2]<v[5]) v_max[2] = v[5];
-                        if(v_max[2]<v[8]) v_max[2] = v[8];
-                                                
                         v16.push_back(*((unsigned short *)(v+0)));
                         v16.push_back(*((unsigned short *)(v+1)));
                         v16.push_back(*((unsigned short *)(v+2)));
@@ -175,11 +137,6 @@ int main(int argc, char *argv[]) {
 
                     dict[@"bufferViews"][0][@"byteOffset"] = [NSNumber numberWithInt:offset];
                     dict[@"bufferViews"][0][@"byteLength"] = [NSNumber numberWithInt:(v16.size())*sizeof(unsigned short)];
-                    
-                    for(int n=0; n<3; n++) {
-                        dict[@"accessors"][0][@"min"][n] = [NSNumber numberWithInt:v_min[n]];
-                        dict[@"accessors"][0][@"max"][n] = [NSNumber numberWithInt:v_max[n]];
-                    }
                     
                     dict[@"accessors"][0][@"count"] = [NSNumber numberWithInt:v16.size()/3];
                     NSLog(@"%d",[dict[@"accessors"][0][@"count"] intValue]);
