@@ -32,24 +32,41 @@ export const FGLoader = Object.freeze({
 						
 						
 						const len = +(json["accessors"][0]["count"]);
+						
+						const v = new Float32Array(len*3);
+						for(var n=0; n<v.length; n++) {
+							v[n] = U16toF32(v16[n]);
+						}
+						
+						const vt = new Float32Array(len*2);
+						for(var n=0; n<vt.length; n++) {
+							vt[n] = U16toF32(vt16[n]);
+						}
+						
+						const image = U8.slice(offset+byteOffsets[2],offset+byteOffsets[2]+byteLengths[2]);
+
+						const result = {};
+						
 						if(len<=0xFFFF) {
-							const v = new Float32Array(len*3);
-							for(var n=0; n<v.length; n++) {
-								v[n] = U16toF32(v16[n]);
+							
+							const f = new Uint16Array(len);
+							for(var n=0; n<f.length; n++) { f[n] = n; }
+							
+							result[url] = {
+								"v":v,
+								"vt":vt,
+								"f":f,
+								"img":URL.createObjectURL(new Blob([image.buffer],{type:json["images"][0]["mimeType"]})),
+								"bytes":2
 							}
 							
-							const vt = new Float32Array(len*2);
-							for(var n=0; n<vt.length; n++) {
-								vt[n] = U16toF32(vt16[n]);
-							}
+							init(result);
+						}
+						else {
 							
 							const f = new Uint32Array(len);
-							for(var n=0; n<f.length; n++) {
-								f[n] = n;
-							}
+							for(var n=0; n<f.length; n++) { f[n] = n; }
 							
-							const image = U8.slice(offset+byteOffsets[2],offset+byteOffsets[2]+byteLengths[2]);
-							const result = {};
 							result[url] = {
 								"v":v,
 								"vt":vt,
@@ -59,10 +76,6 @@ export const FGLoader = Object.freeze({
 							}
 							
 							init(result);
-						}
-						else {
-							
-							init(null);
 						}
 					}
 				}
@@ -87,13 +100,11 @@ export const FGLoader = Object.freeze({
 			let data = {};
 			
 			const onload = (result) => {
-				if(result) {
-					const key = Object.keys(result)[0];
-					data[key] = result[key];
-					loaded++;
-					if(loaded===list.length) {
-						init(data);
-					}
+				const key = Object.keys(result)[0];
+				data[key] = result[key];
+				loaded++;
+				if(loaded===list.length) {
+					init(data);
 				}
 			};
 			
