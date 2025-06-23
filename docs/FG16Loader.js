@@ -22,7 +22,6 @@ export const FGLoader = Object.freeze({
 					const bufferViews = json["bufferViews"];
 					const byteOffsets = [bufferViews[0]["byteOffset"],bufferViews[1]["byteOffset"],bufferViews[2]["byteOffset"]];
 					const byteLengths = [bufferViews[0]["byteLength"],bufferViews[1]["byteLength"],bufferViews[2]["byteLength"]];
-
 					
 					if(+(json["accessors"][0]["count"])===+(json["accessors"][1]["count"])) {
 						
@@ -33,23 +32,22 @@ export const FGLoader = Object.freeze({
 						
 						
 						const len = +(json["accessors"][0]["count"]);
-						
-						const v = new Float32Array(len*3);
-						for(var n=0; n<v.length; n++) {
-							v[n] = U16toF32(v16[n]);
-						}
-						
-						const vt = new Float32Array(len*2);
-						for(var n=0; n<vt.length; n++) {
-							vt[n] = U16toF32(vt16[n]);
-						}
-						
-						const f = new Uint32Array(len);
-						for(var n=0; n<f.length; n++) {
-							f[n] = n;
-						}
-						
-						if(v.length&&vt.length) {
+						if(len<=0xFFFF) {
+							const v = new Float32Array(len*3);
+							for(var n=0; n<v.length; n++) {
+								v[n] = U16toF32(v16[n]);
+							}
+							
+							const vt = new Float32Array(len*2);
+							for(var n=0; n<vt.length; n++) {
+								vt[n] = U16toF32(vt16[n]);
+							}
+							
+							const f = new Uint32Array(len);
+							for(var n=0; n<f.length; n++) {
+								f[n] = n;
+							}
+							
 							const image = U8.slice(offset+byteOffsets[2],offset+byteOffsets[2]+byteLengths[2]);
 							const result = {};
 							result[url] = {
@@ -59,7 +57,12 @@ export const FGLoader = Object.freeze({
 								"img":URL.createObjectURL(new Blob([image.buffer],{type:json["images"][0]["mimeType"]})),
 								"bytes":4
 							}
+							
 							init(result);
+						}
+						else {
+							
+							init(null);
 						}
 					}
 				}
@@ -84,11 +87,13 @@ export const FGLoader = Object.freeze({
 			let data = {};
 			
 			const onload = (result) => {
-				const key = Object.keys(result)[0];
-				data[key] = result[key];
-				loaded++;
-				if(loaded===list.length) {
-					init(data);
+				if(result) {
+					const key = Object.keys(result)[0];
+					data[key] = result[key];
+					loaded++;
+					if(loaded===list.length) {
+						init(data);
+					}
 				}
 			};
 			
